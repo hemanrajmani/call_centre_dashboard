@@ -1,0 +1,12 @@
+# Power BI
+*.pbix.lock
+~$*.pbix
+*.pbi.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
