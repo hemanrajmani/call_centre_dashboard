@@ -27,10 +27,10 @@ A Power BI portfolio project analyzing 4 years of synthetic call center data —
 This project simulates a multi-year call center operation and builds an executive-to-operational reporting suite on top of it, covering:
 
 - **Volume and SLA performance** — total calls, answered/abandoned, resolution rate, CSAT, FCR
-- **Time-period comparison** — Month-over-Month, Quarter-over-Quarter, and Year-over-Year, switchable from a single slicer
+- **Time-period comparison** — Dynamic time-intelligence analysis using date and comparison slicers for MoM, QoQ, and YoY performance tracking.
 - **Workforce efficiency** — average speed of answer (ASA), occupancy, shrinkage, and a call-volume heatmap by hour and day of week
 - **Agent performance** — per-agent CSAT, FCR, resolution rate, and a composite performance score
-- **Call driver analysis** — topic-level volume, FCR, AHT, and CSAT, including a topic × agent matrix
+- **Agent analysis** — topic-level volume, FCR, AHT, and CSAT, including a topic × agent matrix
 - **Root-cause drillthrough** — a decomposition tree for abandoned calls by topic and agent
 
 **Dataset:** 4 years of synthetic call center records (Jan 2022 – Dec 2025), modeled after an Avaya WFM-style export. Fully synthetic — no real customer or company data.
@@ -55,7 +55,7 @@ Per-agent CSAT, FCR, and resolution rate with a sortable performance table and a
 ![Agents dashboard](screenshots/03_agents.png)
 
 ### 4. Topics analysis
-Call-driver breakdown: volume by topic with FCR overlay, an AHT-vs-CSAT scatter, a resolved/unresolved comparison, and a topic × agent FCR matrix.
+Topics breakdown: volume by topic with FCR overlay, an AHT-vs-CSAT scatter, a resolved/unresolved comparison, and a topic × agent FCR matrix.
 
 ![Topics analysis page](screenshots/04_topics.png)
 
@@ -124,10 +124,7 @@ The model has 150+ measures. A representative selection — full list and explan
 ```dax
 FCR % =
 DIVIDE(
-    CALCULATE([Total Calls], fact_callcenter[IsResolved] = 1, fact_callcenter[IsAnswered] = 1),
-    [Answered Calls],
-    0
-)
+    CALCULATE([Resolved Calls],    [Answered Calls], 0)
 ```
 
 ```dax
@@ -156,7 +153,6 @@ RETURN
 ```
 
 **Notable patterns used in this project:**
-- A disconnected `Period Selector` table drives MoM/QoQ/YoY across every KPI from a single slicer, instead of building separate visuals per period.
 - KPI rings, bar charts, and shift-performance visuals are rendered as DAX-generated SVG strings, not native Power BI visuals.
 - All boolean flags and bucketing (`IsAnswered`, `IsResolved`, SLA bucket, hour-of-day) are computed once in Power Query and reused across every measure, rather than recomputed in DAX at query time.
 
@@ -164,14 +160,11 @@ RETURN
 
 ## Design decisions
 
-**Why a 9-table star schema instead of one flat table?**
+**9-table with star schema**
 A single denormalized table would have made early development faster, but it breaks down the moment you need independent filtering — e.g., filtering by agent without losing the topic-level FCR context. Splitting agents, topics, time, and ratings into their own dimensions keeps every slicer independent and keeps the fact table narrow.
 
-**Why a disconnected `Period Selector` table instead of three separate measure sets?**
-Building MoM, QoQ, and YoY as three permanently separate measures would have tripled the visual count on the Summary page. A single disconnected table with a `SELECTEDVALUE()` switch inside each measure lets one set of KPI cards serve all three comparison modes from one slicer — at the cost of every period-comparison measure carrying a `SWITCH()` branch it doesn't always need.
-
-**Where I'd trade off differently next time:**
-The eight `_Curr_`/`_Prev_` period-comparison measures (one pair per KPI) duplicate the same `DATESINPERIOD`/`SWITCH` scaffold with only the base measure swapped each time — about 500 lines that could be one parameterized measure. It was the right call for shipping speed at this project's scale, but it's the first thing I'd refactor if the table count grew.
+**A disconnected `Period Selector` table instead of three separate measure sets**
+A disconnected `Period Selector` table enables dynamic switching between MoM, QoQ, and YoY comparisons from a single slicer. This design reduces visual clutter and provides a more interactive experience. The approach can be further enhanced by centralizing the comparison logic to improve measure reusability and maintainability.
 
 ---
 
@@ -180,7 +173,6 @@ The eight `_Curr_`/`_Prev_` period-comparison measures (one pair per KPI) duplic
 - **Power BI Desktop** — data modeling, DAX, report design
 - **Power Query (M)** — data cleaning, type casting, derived columns
 - **DAX** — 150+ measures including time intelligence and SVG-rendered visuals
-- **TMDL** — model defined in Tabular Model Definition Language for version control readability
 
 ---
 
@@ -199,13 +191,12 @@ The eight `_Curr_`/`_Prev_` period-comparison measures (one pair per KPI) duplic
 
 - The data source path must be manually repointed after cloning (see above).
 - The 4-year dataset is synthetic and was not validated against a real-world call center benchmark dataset; KPI targets (e.g., ASA ≤ 70s, FCR ≥ 85%) were chosen to be industry-plausible, not derived from a specific organization.
-- The period-comparison DAX engine is functionally correct but duplicated across 8 KPIs rather than parameterized — see [Design decisions](#design-decisions).
 
 ---
 
 ## About the data
 
-All data in this project is **synthetic** and was generated for portfolio/learning purposes. It does not represent any real company, call center, or individual. "Avaya WFM" in the source filename refers to the *style* of export the data was modeled after, not an actual Avaya data extract.
+All data in this project is **synthetic** and was generated for portfolio project purposes. It does not represent any real company, call center, or individual. "Avaya WFM" in the source filename refers to the *style* of export the data was modeled after, not an actual Avaya data extract.
 
 ---
 
