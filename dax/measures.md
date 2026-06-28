@@ -14,11 +14,7 @@ Answered Calls = CALCULATE([Total Calls], fact_callcenter[IsAnswered] = 1)
 Resolved Calls = CALCULATE([Total Calls], fact_callcenter[IsResolved] = 1)
 
 FCR % =
-DIVIDE(
-    CALCULATE([Total Calls], fact_callcenter[IsResolved] = 1, fact_callcenter[IsAnswered] = 1),
-    [Answered Calls],
-    0
-)
+DIVIDE(CALCULATE(Resolved Calls, [Answered Calls], 0)
 
 CSAT Avg = AVERAGE(fact_callcenter[Satisfaction rating])
 
@@ -51,15 +47,14 @@ VAR _MaxDate = MAX(dim_calendar[Date])
 RETURN
     SWITCH(
         TRUE(),
-        _Period = "MoM", CALCULATE([Total Calls], DATESINPERIOD(dim_calendar[Date], EDATE(_MaxDate, -1), -1, MONTH)),
-        _Period = "QoQ", CALCULATE([Total Calls], DATESINPERIOD(dim_calendar[Date], EDATE(_MaxDate, -3), -1, QUARTER)),
-        _Period = "YoY", CALCULATE([Total Calls], DATESINPERIOD(dim_calendar[Date], EDATE(_MaxDate, -12), -1, YEAR))
-    )
-
+        _Period = "MoM", CALCULATE([Total Calls], REMOVEFILTERS(dim_calendar), DATESBETWEEN(dim_calendar[Date], EOMONTH(_MaxDate, -2)+1, EOMONTH(_MaxDate, -1))),
+        _Period = "QoQ", CALCULATE([Total Calls], REMOVEFILTERS(dim_calendar), DATESBETWEEN(dim_calendar[Date], EOMONTH(_MaxDate, -6)+1, EOMONTH(_MaxDate, -3))),
+        _Period = "YoY", CALCULATE([Total Calls], REMOVEFILTERS(dim_calendar), DATESBETWEEN(dim_calendar[Date], EOMONTH(_MaxDate, -24)+1, EOMONTH(_MaxDate, -12)))
+        
 Calls_Growth_% = DIVIDE([Calls_Curr_Total_Value] - [Calls_Prev_Total_Value], [Calls_Prev_Total_Value], 0)
 ```
 
-This same three-measure pattern (`_Curr_`, `_Prev_`, `_Growth_%`) repeats for eight KPIs: Calls, AHT, Answered, Resolved, Abandoned, CSAT, FCR, and Utilization. It's the largest single block of DAX in the model — and also the most repetitive. A more DRY version would pass the base measure as a parameter into one shared function rather than duplicating the `SWITCH`/`DATESINPERIOD` scaffold eight times; that's the explicit tradeoff documented in the main README.
+This same three-measure pattern (`_Curr_`, `_Prev_`, `_Growth_%`) repeats for eight KPIs: Calls, AHT, Answered, Resolved, Abandoned, CSAT, FCR, and Utilization. It's the largest single block of DAX in the model — and also the most repetitive.
 
 ---
 
@@ -70,7 +65,7 @@ ASA Seconds = AVERAGE(fact_callcenter[Speed of answer in seconds])
 
 ASA SLA % =
 DIVIDE(
-    CALCULATE([Total Calls], fact_callcenter[Speed of answer in seconds] <= 60, fact_callcenter[IsAnswered] = 1),
+    CALCULATE([Total Calls], fact_callcenter[Speed of answer in seconds] <= 70, fact_callcenter[IsAnswered] = 1),
     [Answered Calls],
     0
 )
