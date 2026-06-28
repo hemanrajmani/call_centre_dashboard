@@ -200,6 +200,21 @@ All data in this project is **synthetic** and was generated for portfolio projec
 
 ---
 
+## Contact
+
+Feel free to reach out for feedback, collaboration, or opportunities:
+
+- 💼 LinkedIn: https://www.linkedin.com/in/hemanraj-mani
+- 📧 Email: hemanrajmani@gmail.com  
+
+---
+
+## If you like this project
+
+Please give it a ⭐ on GitHub!
+
+---
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
