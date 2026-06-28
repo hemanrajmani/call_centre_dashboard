@@ -11,7 +11,7 @@ Column-level reference for every table in the model. Grain, types, and relations
 |---|---|---|
 | Date | Date | Calendar date of the call. Joins to `dim_calendar[Date]`. |
 | Agent | Text | Agent who handled the call. Joins to `dim_agents[Agent]`. |
-| Topic | Text | Call driver / category. Joins to `dim_topics[Topic]`. |
+| Topic | Text | Call category. Joins to `dim_topics[Topic]`. |
 | TimeId | Whole number | Hour of day (0–23) the call started. Joins to `dim_time[Value]`. |
 | Satisfaction rating | Whole number | 1–5 customer satisfaction score. Joins to `dim_ratings[Value]`. |
 | IsAnswered | Whole number (0/1) | Pre-computed in Power Query — 1 if the call was answered, 0 if abandoned. |
