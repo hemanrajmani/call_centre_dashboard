@@ -1,6 +1,6 @@
 # Call Center Performance Dashboard
 
-A Power BI portfolio project analyzing 4 years of synthetic call center data — built on a 9-table star schema with 150+ DAX measures, custom SVG-rendered KPI visuals, time-intelligence period comparison (MoM / QoQ / YoY), and drillthrough root-cause analysis.
+A Power BI portfolio project analyzing 4 years of synthetic call center data — built on a 9-tables and star schema with 150+ DAX measures, custom SVG-rendered KPI visuals, time-intelligence period comparison (MoM / QoQ / YoY), and drillthrough root-cause analysis.
 
 ![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=flat&logo=powerbi&logoColor=black)
 ![DAX](https://img.shields.io/badge/DAX-150%2B%20measures-blue)
